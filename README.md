@@ -56,8 +56,8 @@ The RGV is one of the most Spanish-dominant regions in the country. Over 90% of 
 
 ## Built For
 
-This project was built with the Rio Grande Valley community in mind, a region whose residents deserve the same access to legal knowledge that money and education have always provided to others.
+This project was built with the Rio Grande Valley community and Texas residents in mind, a region whose residents deserve the same access to legal knowledge that money and education have always provided to others.
 
 ---
 
-*Know The Law is for educational purposes only and does not constitute legal advice*
+*My project "Know The Law" is for educational purposes only and does not constitute legal advice*
