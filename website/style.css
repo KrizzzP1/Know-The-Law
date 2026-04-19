@@ -122,9 +122,9 @@ body {
 }
 
 .amendment-btn.active {
-  background: var(--blue-dim);
-  border-left-color: var(--blue);
-  color: var(--cyan);
+  background: var(--tx-dim);
+  border-left-color: var(--tx);
+  color: var(--text);
 }
 
 .numeral-badge {
@@ -144,9 +144,9 @@ body {
 }
 
 .amendment-btn.active .numeral-badge {
-  background: var(--blue-dim);
-  border-color: var(--blue-border);
-  color: var(--blue);
+  background: var(--tx-dim);
+  border-color: var(--tx-border);
+  color: var(--tx);
 }
 
 .btn-amendment-info { flex: 1; min-width: 0; }
@@ -164,8 +164,8 @@ body {
 }
 
 .amendment-btn.active .btn-amendment-sub {
-  color: var(--blue);
-  opacity: 0.75;
+  color: var(--tx);
+  opacity: 0.8;
 }
 
 .sidebar-footer {
@@ -199,9 +199,9 @@ body {
 }
 
 .home-btn.active {
-  background: var(--blue-dim);
-  border-left-color: var(--blue);
-  color: var(--cyan);
+  background: var(--tx-dim);
+  border-left-color: var(--tx);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -297,7 +297,7 @@ body {
   margin-bottom: 16px;
 }
 
-.welcome-heading span { color: var(--blue); }
+.welcome-heading span { color: var(--tx); }
 
 .welcome-sub {
   font-size: 16px;
@@ -334,8 +334,8 @@ body {
 }
 
 .welcome-card:hover {
-  border-color: var(--blue);
-  background: var(--blue-dim);
+  border-color: var(--tx);
+  background: var(--tx-dim);
   transform: translateY(-1px);
 }
 
@@ -343,7 +343,7 @@ body {
   font-family: Georgia, serif;
   font-size: 30px;
   font-weight: 700;
-  color: var(--blue);
+  color: var(--tx);
   line-height: 1;
   margin-bottom: 12px;
 }
@@ -361,7 +361,7 @@ body {
 
 /* ── Question section ────────────────────────────────────────────────────── */
 
-.question-section { max-width: 640px; }
+.question-section { max-width: 640px; margin: 0 auto; width: 100%; }
 
 .nav-row {
   display: flex;
@@ -434,8 +434,8 @@ body {
 .option-label:hover { border-color: var(--text-muted); }
 
 .option-label.selected {
-  border-color: var(--blue);
-  background: var(--blue-dim);
+  border-color: var(--tx);
+  background: var(--tx-dim);
 }
 
 .option-label input[type="radio"] { display: none; }
@@ -453,8 +453,8 @@ body {
 }
 
 .option-label.selected .radio-dot {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: var(--tx);
+  background: var(--tx);
 }
 
 .radio-dot::after {
@@ -486,7 +486,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 22px;
-  background: var(--blue);
+  background: var(--tx);
   border: none;
   border-radius: var(--r-sm);
   color: #fff;
@@ -507,7 +507,7 @@ body {
 
 /* ── Conclusion section ──────────────────────────────────────────────────── */
 
-.conclusion-section { max-width: 640px; }
+.conclusion-section { max-width: 640px; margin: 0 auto; width: 100%; }
 
 /* Alert card */
 .alert-card {
@@ -689,7 +689,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 9px 18px;
-  background: var(--blue);
+  background: var(--tx);
   border: none;
   border-radius: var(--r-sm);
   color: #fff;
