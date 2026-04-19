@@ -265,7 +265,9 @@ body {
   transform: translate(-50%, -48%);
   line-height: 1;
   z-index: 0;
+  -webkit-user-select: none;
   user-select: none;
+  -webkit-filter: blur(2px);
   filter: blur(2px);
 }
 
@@ -544,6 +546,8 @@ body {
   font-size: 15px;
   line-height: 1.7;
   color: var(--text);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Rights card */
@@ -614,6 +618,8 @@ body {
   font-size: 14px;
   line-height: 1.7;
   color: var(--text);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Texas law callout */
@@ -656,6 +662,8 @@ body {
   font-size: 13px;
   line-height: 1.65;
   color: var(--text-muted);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Action buttons */
