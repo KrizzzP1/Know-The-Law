@@ -700,3 +700,123 @@ body {
 }
 
 .btn-primary:hover { filter: brightness(1.1); }
+
+/* ── Mobile menu toggle ──────────────────────────────────────────────────── */
+
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.menu-toggle:hover { color: var(--text); border-color: var(--text-muted); }
+
+/* Dim overlay when sidebar is open on mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9;
+}
+
+body.menu-open .sidebar-overlay { display: block; }
+
+/* ── Responsive breakpoints ──────────────────────────────────────────────── */
+
+/* Tablet: 641px – 960px */
+@media (max-width: 960px) {
+  :root { --sidebar-w: 230px; }
+
+  .main { padding: 40px 28px 60px; }
+
+  .welcome { padding-top: 32px; }
+  .welcome-heading { font-size: 34px; }
+  .welcome-cards { grid-template-columns: repeat(2, 1fr); }
+
+  .question-section,
+  .conclusion-section { max-width: 100%; }
+
+  .main::before { font-size: 480px; }
+}
+
+/* Mobile: ≤ 640px */
+@media (max-width: 640px) {
+  .menu-toggle { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    z-index: 10;
+  }
+
+  body.menu-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 68px 16px 60px;  /* top pad clears menu-toggle button */
+    align-items: stretch;
+  }
+
+  .welcome {
+    padding-top: 8px;
+    text-align: left;
+  }
+
+  .welcome-eyebrow { font-size: 11px; }
+  .welcome-heading { font-size: 26px; }
+  .welcome-sub     { font-size: 14px; margin-bottom: 28px; text-align: left; max-width: 100%; }
+
+  .welcome-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .wc-numeral { font-size: 22px; }
+  .wc-title   { font-size: 12px; }
+  .wc-sub     { font-size: 11px; }
+
+  .question-text { font-size: 19px; }
+
+  .option-label { padding: 12px 14px; gap: 12px; }
+  .option-text  { font-size: 13px; }
+
+  .alert-body   { font-size: 14px; padding: 14px 16px; }
+  .alert-header { padding: 11px 16px; }
+
+  .rights-list li { font-size: 13px; }
+  .advice-body    { font-size: 13px; padding: 14px 16px; }
+
+  .action-row {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-row { flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+  .main::before { font-size: 260px; opacity: 0.6; }
+
+  .texas-note-body { font-size: 12px; }
+}

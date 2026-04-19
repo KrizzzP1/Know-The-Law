@@ -1083,7 +1083,7 @@ function renderWelcome() {
   `;
 }
 
-function renderQuestion(node) {
+function renderQuestion(node, preserveSelection = false) {
   const n = translateNode(node);
   document.getElementById('content').innerHTML = `
     <div class="question-section">
@@ -1115,7 +1115,16 @@ function renderQuestion(node) {
       ` : ''}
     </div>
   `;
-  state.selected = null;
+  if (preserveSelection && state.selected !== null) {
+    // Restore visual radio state after a language switch
+    const prev = state.selected;
+    document.querySelectorAll('.option-label').forEach((el, i) => {
+      el.classList.toggle('selected', i === prev.idx);
+    });
+    document.getElementById('btn-continue')?.classList.add('ready');
+  } else {
+    state.selected = null;
+  }
 }
 
 function renderConclusion(node) {
@@ -1179,6 +1188,7 @@ function selectAmendment(id) {
   state.nodeId    = state.amendment.tree.root;
   state.history   = [];
   state.selected  = null;
+  document.body.classList.remove('menu-open'); // close mobile sidebar
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1226,7 +1236,11 @@ function goHome() {
 
 function setLang(lang) {
   state.lang = lang;
-  render();
+  renderSidebar();
+  if (!state.amendment) { renderWelcome(); return; }
+  const node = state.amendment.tree.nodes[state.nodeId];
+  if (node.type === 'question') renderQuestion(node, true);  // preserve radio selection
+  else                          renderConclusion(node);
 }
 
 function resetAmendment() {

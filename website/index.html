@@ -7,9 +7,18 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- Mobile menu toggle -->
+  <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+    ☰ Menu
+  </button>
+
+  <!-- Dim overlay — tap to close sidebar on mobile -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <div class="layout">
 
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="brand">
         <span class="brand-icon">⚖</span>
         <div>
@@ -28,6 +37,15 @@
     </main>
 
   </div>
+
   <script src="app.js"></script>
+  <script>
+    // Mobile sidebar toggle
+    const toggle  = document.getElementById('menu-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    function closeSidebar() { document.body.classList.remove('menu-open'); }
+    toggle.addEventListener('click', () => document.body.classList.toggle('menu-open'));
+    overlay.addEventListener('click', closeSidebar);
+  </script>
 </body>
 </html>
