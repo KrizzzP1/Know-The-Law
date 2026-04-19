@@ -4,89 +4,117 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Running the app
 
+**Website (primary):**
 ```bash
-py -X utf8 main.py          # run the navigator (Windows — requires Python 3.7+)
-python3 -X utf8 main.py     # macOS / Linux
+start website/index.html       # Windows — open in default browser (no server needed)
 ```
 
-The `-X utf8` flag is required on Windows to force UTF-8 output; otherwise the terminal defaults to cp1252 and box-drawing characters crash with `UnicodeEncodeError`.
+**CLI version:**
+```bash
+py -X utf8 main.py             # Windows — requires Python 3.7+
+python3 -X utf8 main.py        # macOS / Linux
+```
 
-**No dependencies.** The project uses only the Python standard library. There is no `requirements.txt`, `venv`, or install step.
+The `-X utf8` flag is required on Windows; the terminal defaults to cp1252 and box-drawing characters will crash without it.
 
-## Validating trees
-
-Run this one-liner to verify all decision-tree nodes exist and every `next` link resolves:
-
+**Validate decision-tree links (catch dead `next:` references before committing):**
 ```bash
 py -X utf8 -c "
-from src.amendments import AMENDMENTS
-def check(a):
-    n = a['tree']['nodes']
-    assert a['tree']['root'] in n
-    for nid, node in n.items():
-        for opt in node.get('options', []):
-            assert opt['next'] in n, f'{nid} -> {opt[\"next\"]} broken'
-[check(a) for a in AMENDMENTS]
-print('OK')
+import re, pathlib, sys
+src = pathlib.Path('website/app.js').read_text(encoding='utf-8')
+defined  = set(re.findall(r'^\s{8}([\w]+): \{', src, re.MULTILINE))
+referred = set(re.findall(r\"next: '([\w]+)'\", src))
+roots    = set(re.findall(r\"root: '([\w]+)'\", src))
+broken = (referred | roots) - defined
+print('BROKEN:', broken or 'none'); sys.exit(1 if broken else 0)
 "
 ```
+
+**No dependencies.** Both the CLI and website use only stdlib / vanilla JS. There is no `npm install`, `pip install`, build step, or dev server.
+
+## Deployment
+
+GitHub Actions (`.github/workflows/deploy.yml`) auto-deploys `website/` to GitHub Pages on every push to `main`. Before the workflow will succeed, the Pages source must be set to **GitHub Actions** in repo Settings → Pages.
 
 ## Architecture
 
 ```
-main.py                   Entry point — wires Display + Navigator, calls display.welcome()
+main.py                  CLI entry point
 src/
-  display.py              All terminal output (ANSI colors, box-drawing, text wrapping)
-  navigator.py            Decision-tree engine — traverses nodes, drives menus, handles input
-  amendments/
-    __init__.py           Exports AMENDMENTS list (order = menu order)
-    fourth.py             4th Amendment tree (search & seizure, 18 nodes)
-    fifth.py              5th Amendment tree (right to remain silent, 16 nodes)
-    sixth.py              6th Amendment tree (right to counsel, 9 nodes)
+  display.py             ANSI terminal output (UTF-8 reconfigured on Windows)
+  navigator.py           Decision-tree traversal engine + input loop
+  amendments/            Python decision-tree data (4th, 5th, 6th, 8th)
+
+website/
+  index.html             Static shell — sidebar + #content mount point
+  style.css              Dark "Texas-Modern" theme, all component styles
+  app.js                 All tree data + bilingual translations + rendering engine
 ```
 
-### How the decision tree works
+### Decision-tree node format
 
-Each amendment module exports a single dict with this shape:
+Every node in `app.js` lives inside an amendment's `tree.nodes` object:
 
-```python
+```js
+// Question node
 {
-  'id':       str,          # unique identifier
-  'title':    str,          # display name  e.g. '4th Amendment'
-  'subtitle': str,          # short description e.g. '— Search & Seizure'
-  'tree': {
-    'root':  str,           # id of the entry node
-    'nodes': {
-      '<id>': {
-        'type':      'question' | 'conclusion' | 'info',
-        'text':      str,
-        'amendment': str,                      # optional tag shown in header
-        # question-only:
-        'options':   [{'label': str, 'next': str}],
-        # info-only:
-        'next':      str,
-        # conclusion-only:
-        'severity':  'info' | 'warning' | 'critical',
-        'rights':    [str],
-        'advice':    str,
-      }
-    }
-  }
+  type: 'question',
+  amendment: '4th',           // tag shown in header
+  text: 'English question?',
+  options: [{ label: 'English label', next: 'node_id' }],
+  es: {
+    text: 'Pregunta en español?',
+    options: ['Opción 1', 'Opción 2'],  // same order; only labels translated
+  },
+}
+
+// Conclusion node
+{
+  type: 'conclusion',
+  severity: 'info' | 'warning' | 'critical',
+  text: 'English body',
+  rights: ['Right 1'],
+  advice: 'What to say verbatim',
+  texasNote: 'Texas-specific legal nuance',   // optional — renders as TX callout
+  es: {
+    text: 'Cuerpo en español',
+    rights: ['Derecho 1'],
+    advice: 'Qué decir literalmente',
+    texasNote: 'Nota legal específica de Texas',  // optional
+  },
 }
 ```
 
-`Navigator._traverse()` is recursive: question nodes prompt the user and recurse into the chosen `next`; conclusion nodes call `display.conclusion()` and return; info nodes print a line and follow their single `next` pointer.
+`next` values are always English node IDs (structural, never translated). `translateNode(node)` in `app.js` merges the `es` object over the base node at render time, preserving `next` links. Language state is stored in `state.lang` and switching with `setLang()` re-renders in place without resetting navigation history.
 
-### Adding a new amendment
+### UI translations
 
-1. Create `src/amendments/<name>.py` exporting a dict in the shape above.
-2. Import and append it to `AMENDMENTS` in `src/amendments/__init__.py`.
-3. Run the validation one-liner to confirm no broken links.
+All button labels, headers, and UI strings live in the `UI` object at the top of `app.js`:
+```js
+const UI = { en: { ... }, es: { ... } }
+```
+Access via `u('key')` — never hardcode strings in render functions.
 
-### Adding nodes to an existing tree
+### Amendment structure
 
-Add the node dict to the `nodes` dict in the relevant amendment file. Ensure every `next` reference points to an existing node id. Run the validator.
+Each entry in `AMENDMENTS` has:
+```js
+{ id, numeral, title, subtitle, esTitle, esSubtitle, tree: { root, nodes } }
+```
+
+Currently: `fourth` (18 nodes + 6 checkpoint nodes), `fifth` (16 nodes), `sixth` (9 nodes), `eighth` (10 nodes).
+
+### Adding a node or amendment
+
+1. Add the node dict to the correct `tree.nodes` object (include `es` object).
+2. If it's a question node, verify every `next` value points to an existing node id.
+3. Run the validation one-liner above.
+4. For a new amendment, add `esTitle`/`esSubtitle` fields and append to `AMENDMENTS`.
+
+## Texas-specific layer
+
+Nodes that carry a `texasNote` / `es.texasNote` render a burnt-orange **TX** callout card. Current nodes with Texas notes: `vehicle_traffic` (TTC § 543.001), `street_detained` (PC § 38.02), `not_in_custody` (PC § 38.02), `compelled_physical` (TTC § 724.011 implied consent), `bail_overview`, `excessive_bail`, `bail_denied_capital`, `cannot_afford` (8th), `rights_holding`, and the full Border Patrol checkpoint branch.
 
 ## Windows encoding note
 
-`display.py` reconfigures `sys.stdout` and `sys.stdin` to UTF-8 on import (when `sys.platform == 'win32'`). This must happen before any print call that uses Unicode box-drawing characters. Do not remove this block.
+`src/display.py` reconfigures `sys.stdout` / `sys.stdin` to UTF-8 on import when running on Windows. Do not remove this block — it must execute before any print call.
