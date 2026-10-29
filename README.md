@@ -3,6 +3,10 @@
 
 > *"Know your rights, be protected."*
 
+**Winner, Best Beginner at Frontera Hacks 2026** (UTRGV's hackathon)
+
+**Live site:** [krizzzp1.github.io/Know-The-Law](https://krizzzp1.github.io/Know-The-Law/)
+
 ---
 
 ## The Problem
@@ -38,15 +42,16 @@ Rural stretches of Hidalgo, Cameron, Starr, and Willacy counties have inconsiste
 
 ---
 
-### Bilingual-Ready
+### Bilingual
 
-The RGV is one of the most Spanish-dominant regions in the country. Over 90% of residents speak Spanish at home, and many are more comfortable navigating legal concepts in Spanish than in English. Know The Law's decision-tree data structure is designed to be translated without touching the application logic.
+The RGV is one of the most Spanish-dominant regions in the country. Over 90% of residents speak Spanish at home, and many are more comfortable navigating legal concepts in Spanish than in English. Know The Law is fully bilingual. An EN/ES toggle switches the whole app between English and Spanish at any point, without losing your place in the decision tree.
 
 ---
 
 ## Constitutional Coverage
 
-| Amendments Covered |
+| Amendment | What It Covers |
+|---|---|
 | **4th** | Home searches, vehicle stops, street detentions, Terry frisks, phone/device searches |
 | **5th** | Miranda rights, custodial interrogation, right to remain silent, compelled evidence, grand jury |
 | **6th** | Right to counsel, public defenders, arraignment, speedy trial, right to know charges |
