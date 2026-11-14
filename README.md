@@ -44,7 +44,7 @@ Rural stretches of Hidalgo, Cameron, Starr, and Willacy counties have inconsiste
 
 ### Bilingual
 
-The RGV is one of the most Spanish-dominant regions in the country. Over 90% of residents speak Spanish at home, and many are more comfortable navigating legal concepts in Spanish than in English. Know The Law is fully bilingual. An EN/ES toggle switches the whole app between English and Spanish at any point, without losing your place in the decision tree.
+The RGV is one of the most Spanish-dominant regions in the country. About 4 in 5 residents speak Spanish at home (U.S. Census Bureau, American Community Survey), and many are more comfortable navigating legal concepts in Spanish than in English. Know The Law is fully bilingual. An EN/ES toggle switches the whole app between English and Spanish at any point, without losing your place in the decision tree.
 
 ---
 
@@ -56,6 +56,12 @@ The RGV is one of the most Spanish-dominant regions in the country. Over 90% of 
 | **5th** | Miranda rights, custodial interrogation, right to remain silent, compelled evidence, grand jury |
 | **6th** | Right to counsel, public defenders, arraignment, speedy trial, right to know charges |
 | **8th** | Bail process, excessive bail, bail denial, pre-trial detention rights, rights while in holding |
+
+---
+
+## How It Was Built
+
+Know The Law was a solo project. I designed the decision tree: the scenarios it covers, the questions it asks, and every outcome a user can reach. I researched and wrote all of the legal content. The code was written with AI development tools that I directed, through testing and deployment.
 
 ---
 
