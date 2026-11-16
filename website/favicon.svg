@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Know The Law</title>
+  <rect width="64" height="64" rx="14" fill="#0b0d12"/>
+  <g fill="none" stroke="#e07318" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 13v37"/>
+    <path d="M21 51h22"/>
+    <path d="M13 20h38"/>
+    <path d="M13 20 6.5 35M13 20l6.5 15"/>
+    <path d="M51 20l-6.5 15M51 20l6.5 15"/>
+  </g>
+  <g fill="#e07318">
+    <circle cx="32" cy="13" r="3.5"/>
+    <path d="M4.5 35h17a8.5 8.5 0 0 1-17 0z"/>
+    <path d="M42.5 35h17a8.5 8.5 0 0 1-17 0z"/>
+  </g>
+</svg>

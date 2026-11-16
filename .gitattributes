@@ -1,0 +1,3 @@
+# Store text files with LF line endings on every computer, Windows included.
+# Git still detects images and other binary files on its own and leaves them alone.
+* text=auto eol=lf

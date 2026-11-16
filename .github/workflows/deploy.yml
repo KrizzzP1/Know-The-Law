@@ -18,6 +18,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # a healthy deploy takes under a minute; stop a stuck one instead of waiting hours
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
