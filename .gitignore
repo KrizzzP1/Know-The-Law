@@ -1,4 +1,12 @@
-__pycache__/
-*.py[cod]
-*.pyo
+# Secrets and local settings. Never commit these.
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor and OS clutter
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

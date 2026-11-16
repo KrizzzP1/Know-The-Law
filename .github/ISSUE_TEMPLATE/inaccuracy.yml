@@ -1,0 +1,51 @@
+name: Report an inaccuracy
+description: Something on the site is wrong, unclear or out of date
+title: "Inaccuracy: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep Know The Law accurate. Laws change, and corrections are welcome.
+
+        This form is for problems with the site's content. It can't be used to get legal advice about a situation.
+  - type: dropdown
+    id: section
+    attributes:
+      label: Which part of the site?
+      options:
+        - 4th Amendment (search and seizure)
+        - 5th Amendment (right to remain silent)
+        - 6th Amendment (right to counsel)
+        - 8th Amendment (bail and post-arrest rights)
+        - Other or not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Which language were you reading?
+      options:
+        - English
+        - Español
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: What does the site say?
+      description: Copy the sentence, or describe the screen you were on.
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: What should it say?
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: A link to the statute, court case or official page that supports the correction.
+      placeholder: https://statutes.capitol.texas.gov/
