@@ -19,6 +19,12 @@ const UI = {
     disclaimer:     'For educational purposes only. Not legal advice.',
     langToggle:     'Español',
     amendmentTag:   n => `${n} Amendment`,
+    // Text that lives in index.html; applyStaticText() keeps it in step with the language
+    docTitle:       'Know The Law — Constitutional Rights Navigator',
+    brandSub:       'Constitutional Rights Navigator',
+    footer:         'For educational purposes only.<br>Not legal advice.',
+    menuLabel:      'Menu',
+    langGroupLabel: 'Language',
   },
   es: {
     homeBtn:        'Inicio',
@@ -38,6 +44,12 @@ const UI = {
     disclaimer:     'Solo con fines educativos. No es asesoría legal.',
     langToggle:     'English',
     amendmentTag:   n => { const m = {'4th':'4.ª','5th':'5.ª','6th':'6.ª','8th':'8.ª'}; return `Enmienda ${m[n]||n}`; },
+    // Text that lives in index.html; applyStaticText() keeps it in step with the language
+    docTitle:       'Know The Law — Navegador de Derechos Constitucionales',
+    brandSub:       'Navegador de Derechos Constitucionales',
+    footer:         'Solo con fines educativos.<br>No es asesoría legal.',
+    menuLabel:      'Menú',
+    langGroupLabel: 'Idioma',
   },
 };
 
@@ -1021,6 +1033,8 @@ const state = {
   lang:      'en',
 };
 
+const LANG_KEY = 'ktl-lang';  // where the browser remembers the language choice
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function u(key) {
@@ -1039,6 +1053,54 @@ function translateNode(node) {
   return tr;
 }
 
+// Browser storage can be switched off (private browsing), so these never throw.
+function loadLang() {
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    return saved === 'en' || saved === 'es' ? saved : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveLang(lang) {
+  try {
+    localStorage.setItem(LANG_KEY, lang);
+  } catch (e) {
+    // Not saved. The toggle still works for this visit.
+  }
+}
+
+// Text that lives in index.html instead of a render function. Setting <html lang>
+// is what makes a screen reader pronounce Spanish as Spanish.
+function applyStaticText() {
+  document.documentElement.lang = state.lang;
+  document.title = u('docTitle');
+  document.getElementById('brand-sub').textContent = u('brandSub');
+  document.getElementById('sidebar-footer').innerHTML = u('footer');
+  document.getElementById('menu-label').textContent = u('menuLabel');
+  document.getElementById('amendment-nav').setAttribute('aria-label', u('amendmentsLabel'));
+}
+
+// After the view changes, move keyboard and screen-reader focus to its heading.
+// Without this, focus is lost because the button that was pressed no longer exists.
+function focusView() {
+  const heading = document.getElementById('view-heading');
+  if (heading) heading.focus({ preventScroll: true });
+}
+
+function scrollToTop() {
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+}
+
+// Open or close the phone menu and tell assistive technology which it is
+function setMenu(open) {
+  document.body.classList.toggle('menu-open', open);
+  const toggle = document.getElementById('menu-toggle');
+  if (toggle) toggle.setAttribute('aria-expanded', String(open));
+}
+
 // ── Render ────────────────────────────────────────────────────────────────────
 
 function render() {
@@ -1052,26 +1114,30 @@ function render() {
 function renderSidebar() {
   const lang = state.lang;
   document.getElementById('amendment-nav').innerHTML =
-    `<div class="lang-toggle">
-      <button class="lang-btn ${lang === 'en' ? 'active' : ''}" onclick="setLang('en')">EN</button>
-      <button class="lang-btn ${lang === 'es' ? 'active' : ''}" onclick="setLang('es')">ES</button>
+    `<div class="lang-toggle" role="group" aria-label="${u('langGroupLabel')}">
+      <button type="button" class="lang-btn ${lang === 'en' ? 'active' : ''}" lang="en"
+              aria-label="EN – English" aria-pressed="${lang === 'en'}" onclick="setLang('en')">EN</button>
+      <button type="button" class="lang-btn ${lang === 'es' ? 'active' : ''}" lang="es"
+              aria-label="ES – Español" aria-pressed="${lang === 'es'}" onclick="setLang('es')">ES</button>
     </div>
-    <button class="home-btn ${!state.amendment ? 'active' : ''}" onclick="goHome()">
-      <span class="home-icon">⌂</span>
+    <button type="button" class="home-btn ${!state.amendment ? 'active' : ''}"
+            ${!state.amendment ? 'aria-current="page"' : ''} onclick="goHome()">
+      <span class="home-icon" aria-hidden="true">⌂</span>
       <span>${u('homeBtn')}</span>
     </button>
     <div class="sidebar-section-label">${u('amendmentsLabel')}</div>` +
     AMENDMENTS.map(a => {
       const title    = lang === 'es' ? a.esTitle    : a.title;
       const subtitle = lang === 'es' ? a.esSubtitle : a.subtitle;
+      const active   = state.amendment?.id === a.id;
       return `
-        <button class="amendment-btn ${state.amendment?.id === a.id ? 'active' : ''}"
-                onclick="selectAmendment('${a.id}')">
-          <div class="numeral-badge">${a.numeral}</div>
-          <div class="btn-amendment-info">
-            <div class="btn-amendment-title">${title}</div>
-            <div class="btn-amendment-sub">${subtitle}</div>
-          </div>
+        <button type="button" class="amendment-btn ${active ? 'active' : ''}"
+                ${active ? 'aria-current="page"' : ''} onclick="selectAmendment('${a.id}')">
+          <span class="numeral-badge" aria-hidden="true">${a.numeral}</span>
+          <span class="btn-amendment-info">
+            <span class="btn-amendment-title">${title}</span>
+            <span class="btn-amendment-sub">${subtitle}</span>
+          </span>
         </button>`;
     }).join('');
 }
@@ -1081,14 +1147,14 @@ function renderWelcome() {
   document.getElementById('content').innerHTML = `
     <div class="welcome">
       <div class="welcome-eyebrow">${u('eyebrow')}</div>
-      <h1 class="welcome-heading">${u('heading')}</h1>
+      <h1 class="welcome-heading" id="view-heading" tabindex="-1">${u('heading')}</h1>
       <p class="welcome-sub">${u('sub')}</p>
       <div class="welcome-cards">
         ${AMENDMENTS.map(a => `
-          <button class="welcome-card" onclick="selectAmendment('${a.id}')">
-            <div class="wc-numeral">${a.numeral}</div>
-            <div class="wc-title">${lang === 'es' ? a.esTitle : a.title}</div>
-            <div class="wc-sub">${lang === 'es' ? a.esSubtitle : a.subtitle}</div>
+          <button type="button" class="welcome-card" onclick="selectAmendment('${a.id}')">
+            <span class="wc-numeral" aria-hidden="true">${a.numeral}</span>
+            <span class="wc-title">${lang === 'es' ? a.esTitle : a.title}</span>
+            <span class="wc-sub">${lang === 'es' ? a.esSubtitle : a.subtitle}</span>
           </button>
         `).join('')}
       </div>
@@ -1099,46 +1165,44 @@ function renderWelcome() {
 
 function renderQuestion(node, preserveSelection = false) {
   const n = translateNode(node);
+  // After a language switch the same answer stays picked
+  const picked = preserveSelection && state.selected !== null ? state.selected.idx : null;
+  if (picked === null) state.selected = null;
+
   document.getElementById('content').innerHTML = `
     <div class="question-section">
       <div class="nav-row">
         ${state.history.length > 0
-          ? `<button class="btn-back" onclick="goBack()">${u('backBtn')}</button>`
+          ? `<button type="button" class="btn-back" onclick="goBack()">${u('backBtn')}</button>`
           : ''}
-        <button class="btn-back" onclick="goHome()">${u('homeNavBtn')}</button>
+        <button type="button" class="btn-back" onclick="goHome()">${u('homeNavBtn')}</button>
       </div>
       ${n.amendment ? `<div class="amendment-tag">${u('amendmentTag')(n.amendment)}</div>` : ''}
-      <h2 class="question-text">${n.text}</h2>
-      <div class="options-list">
-        ${n.options.map((opt, i) => `
-          <label class="option-label" onclick="pickOption(${i}, '${opt.next}')">
-            <input type="radio" name="choice">
-            <div class="radio-dot"></div>
-            <span class="option-text">${opt.label}</span>
-          </label>
-        `).join('')}
-      </div>
-      <button class="btn-continue" id="btn-continue" onclick="advance()">
-        ${u('continueBtn')}
-      </button>
+      <form onsubmit="advance(); return false;">
+        <h1 class="question-text" id="view-heading" tabindex="-1">${n.text}</h1>
+        <div class="options-list" role="radiogroup" aria-labelledby="view-heading">
+          ${n.options.map((opt, i) => `
+            <label class="option-label${i === picked ? ' selected' : ''}">
+              <input type="radio" name="choice" value="${i}"${i === picked ? ' checked' : ''}
+                     onchange="pickOption(${i}, '${opt.next}')">
+              <span class="radio-dot" aria-hidden="true"></span>
+              <span class="option-text">${opt.label}</span>
+            </label>
+          `).join('')}
+        </div>
+        <button type="submit" class="btn-continue${picked !== null ? ' ready' : ''}" id="btn-continue"
+                aria-disabled="${picked === null}">
+          ${u('continueBtn')}
+        </button>
+      </form>
       ${n.texasNote ? `
         <div class="texas-note">
-          <div class="texas-note-header"><span class="tx-badge">TX</span><span>${u('txHeader')}</span></div>
+          <div class="texas-note-header"><span class="tx-badge" aria-hidden="true">TX</span><h2 class="inline-heading">${u('txHeader')}</h2></div>
           <div class="texas-note-body">${n.texasNote}</div>
         </div>
       ` : ''}
     </div>
   `;
-  if (preserveSelection && state.selected !== null) {
-    // Restore visual radio state after a language switch
-    const prev = state.selected;
-    document.querySelectorAll('.option-label').forEach((el, i) => {
-      el.classList.toggle('selected', i === prev.idx);
-    });
-    document.getElementById('btn-continue')?.classList.add('ready');
-  } else {
-    state.selected = null;
-  }
 }
 
 function renderConclusion(node) {
@@ -1149,22 +1213,22 @@ function renderConclusion(node) {
     <div class="conclusion-section">
       <div class="nav-row">
         ${state.history.length > 0
-          ? `<button class="btn-back" onclick="goBack()">${u('backBtn')}</button>`
+          ? `<button type="button" class="btn-back" onclick="goBack()">${u('backBtn')}</button>`
           : ''}
-        <button class="btn-back" onclick="goHome()">${u('homeNavBtn')}</button>
+        <button type="button" class="btn-back" onclick="goHome()">${u('homeNavBtn')}</button>
       </div>
 
       <div class="alert-card ${n.severity}">
         <div class="alert-header">
-          <span class="alert-icon">${{info:'✔', warning:'⚑', critical:'⚠'}[n.severity]}</span>
-          <span>${headers[n.severity]}</span>
+          <span class="alert-icon" aria-hidden="true">${{info:'✔', warning:'⚑', critical:'⚠'}[n.severity]}</span>
+          <h1 class="inline-heading" id="view-heading" tabindex="-1">${headers[n.severity]}</h1>
         </div>
         <div class="alert-body">${n.text}</div>
       </div>
 
       ${n.rights?.length ? `
         <div class="rights-card">
-          <div class="card-label">${u('rightsSubheader')}</div>
+          <h2 class="card-label">${u('rightsSubheader')}</h2>
           <ul class="rights-list">
             ${n.rights.map(r => `<li>${r}</li>`).join('')}
           </ul>
@@ -1173,23 +1237,23 @@ function renderConclusion(node) {
 
       ${n.advice ? `
         <div class="advice-card">
-          <div class="advice-header"><span>💬</span><span>${u('adviceHeader')}</span></div>
+          <div class="advice-header"><span aria-hidden="true">💬</span><h2 class="inline-heading">${u('adviceHeader')}</h2></div>
           <div class="advice-body">${n.advice}</div>
         </div>
       ` : ''}
 
       ${n.texasNote ? `
         <div class="texas-note">
-          <div class="texas-note-header"><span class="tx-badge">TX</span><span>${u('txHeader')}</span></div>
+          <div class="texas-note-header"><span class="tx-badge" aria-hidden="true">TX</span><h2 class="inline-heading">${u('txHeader')}</h2></div>
           <div class="texas-note-body">${n.texasNote}</div>
         </div>
       ` : ''}
 
       <div class="action-row">
         ${state.history.length > 0
-          ? `<button class="btn-secondary" onclick="goBack()">${u('tryAnother')}</button>`
+          ? `<button type="button" class="btn-secondary" onclick="goBack()">${u('tryAnother')}</button>`
           : ''}
-        <button class="btn-primary" onclick="resetAmendment()">${u('startOver')}</button>
+        <button type="button" class="btn-primary" onclick="resetAmendment()">${u('startOver')}</button>
       </div>
     </div>
   `;
@@ -1202,9 +1266,10 @@ function selectAmendment(id) {
   state.nodeId    = state.amendment.tree.root;
   state.history   = [];
   state.selected  = null;
-  document.body.classList.remove('menu-open'); // close mobile sidebar
+  setMenu(false); // close the phone menu
   render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollToTop();
+  focusView();
 }
 
 function pickOption(idx, nextId) {
@@ -1213,7 +1278,10 @@ function pickOption(idx, nextId) {
     el.classList.toggle('selected', i === idx);
   });
   const btn = document.getElementById('btn-continue');
-  if (btn) btn.classList.add('ready');
+  if (btn) {
+    btn.classList.add('ready');
+    btn.setAttribute('aria-disabled', 'false');
+  }
 }
 
 function advance() {
@@ -1225,7 +1293,8 @@ function advance() {
   if (node.type === 'question') renderQuestion(node);
   else                          renderConclusion(node);
   renderSidebar();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollToTop();
+  focusView();
 }
 
 function goBack() {
@@ -1236,7 +1305,8 @@ function goBack() {
   if (node.type === 'question') renderQuestion(node);
   else                          renderConclusion(node);
   renderSidebar();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollToTop();
+  focusView();
 }
 
 function goHome() {
@@ -1244,17 +1314,27 @@ function goHome() {
   state.nodeId    = null;
   state.history   = [];
   state.selected  = null;
+  setMenu(false);
   render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollToTop();
+  focusView();
 }
 
 function setLang(lang) {
   state.lang = lang;
+  saveLang(lang);
+  applyStaticText();
   renderSidebar();
-  if (!state.amendment) { renderWelcome(); return; }
-  const node = state.amendment.tree.nodes[state.nodeId];
-  if (node.type === 'question') renderQuestion(node, true);  // preserve radio selection
-  else                          renderConclusion(node);
+  if (!state.amendment) {
+    renderWelcome();
+  } else {
+    const node = state.amendment.tree.nodes[state.nodeId];
+    if (node.type === 'question') renderQuestion(node, true);  // keep the picked answer
+    else                          renderConclusion(node);
+  }
+  // The sidebar was rebuilt, so put focus back on the language button that was pressed
+  const activeBtn = document.querySelector('.lang-btn.active');
+  if (activeBtn) activeBtn.focus();
 }
 
 function resetAmendment() {
@@ -1263,9 +1343,26 @@ function resetAmendment() {
   state.selected = null;
   renderQuestion(state.amendment.tree.nodes[state.nodeId]);
   renderSidebar();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollToTop();
+  focusView();
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', render);
+document.addEventListener('DOMContentLoaded', () => {
+  state.lang = loadLang() || 'en';
+  applyStaticText();
+  render();
+
+  // Phone menu: open and close with the button, the dimmed overlay, or Escape
+  const toggle  = document.getElementById('menu-toggle');
+  const overlay = document.getElementById('sidebar-overlay');
+  toggle.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+  overlay.addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.body.classList.contains('menu-open')) {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
+});
